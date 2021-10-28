@@ -23,7 +23,7 @@ SA_Private:
     bool onlyTxtfiles;
 
     Statistics stats;
-    Settings& settings;
+    Settings settings;
 
     int scanForFiles() {
         dir.assign(u8"C:/users/marwik15/desktop/bench");
@@ -49,13 +49,15 @@ SA_Private:
             }
             else {
                 std::cout << "Provided file path is invalid. Exiting..." << '\n';
-                return -1;
+                return EXIT_FAILURE;
             }
         }
         catch (const std::system_error& e) {
             std::cerr << "Caught system_error with code " << e.code()
                 << " meaning " << e.what() << '\n';
         }
+
+        return EXIT_SUCCESS;
     }
 
     void loadAllFileContents() {
@@ -69,7 +71,7 @@ SA_Private:
         }
     }
 public:
-    Application() : settings(Settings()){
+    Application(){
     }
 
     void start() {
