@@ -8,7 +8,7 @@
 class lineCounter {
 public:
 	lineCounter() {
-		emptyLineCount = nonemptyLineCount = 0;
+		emptyLineCount = nonemptyLineCount = totalLineCount = 0;
 	}
 	void countLines(std::string& buffer) {
 
@@ -38,7 +38,8 @@ public:
 		if (strSize-1 != lastPosition) {
 			nonemptyLineCount++;
 		}
-		
+
+		totalLineCount = nonemptyLineCount + emptyLineCount;
 	}
 
 	int getnonemptyLineCount() {
@@ -49,8 +50,13 @@ public:
 		return emptyLineCount;
 	}
 
+	int getTotalLineCount() {
+		return totalLineCount;
+	}
+
 SA_Private:
 	int	emptyLineCount,
-		nonemptyLineCount;
+		nonemptyLineCount,
+		totalLineCount;
 
 };

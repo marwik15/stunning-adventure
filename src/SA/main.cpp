@@ -3,7 +3,7 @@
 #include <iostream>
 #include <filesystem>
 
-#include <SA/stats.hpp>
+#include <SA/Statistics.hpp>
 #include <SA/lineCounter.hpp>
 #include <SA/wordCounter.hpp>
 
@@ -95,6 +95,7 @@ public:
         stats.setfileCount(foundFiles.size());
         stats.setemptyLineCount(getEmptyLineCount());
         stats.setnonemptyLineCount(getnonemptyLineCount());
+        stats.setTotalLineCount(getTotalLineCount());
     }
 
 };

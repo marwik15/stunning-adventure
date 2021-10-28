@@ -13,7 +13,7 @@ using ::testing::UnitTest;
 #include <sstream>
 
 #define test
-#include <SA/stats.hpp>
+#include <SA/Statistics.hpp>
 #include <SA/lineCounter.hpp>
 
 

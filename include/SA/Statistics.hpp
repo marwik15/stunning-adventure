@@ -12,7 +12,8 @@ class Statistics {
 private:
     int fileCount,
         emptyLineCount,
-        nonemptyLineCount;
+        nonemptyLineCount,
+        totalLineCount;
   
 public:
 
@@ -30,6 +31,10 @@ public:
     void setnonemptyLineCount(int emptyLineCount) {
         this->nonemptyLineCount = emptyLineCount;
     }
+    void setTotalLineCount(int totalLineCount) {
+        this->totalLineCount = totalLineCount;
+    }
+
 
     int getfileCount() {
         return fileCount;
@@ -40,6 +45,11 @@ public:
     int getnonemptyLineCount() {
         return nonemptyLineCount;
     }
+
+    int getTotalLineCount() {
+        return totalLineCount;
+    }
+
 
     friend std::ostream& operator<<(std::ostream& os, const Statistics& s);
 
@@ -71,6 +81,7 @@ std::ostream& operator<<(std::ostream& os, const Statistics& s) {
 
     os << "files : " << s.fileCount << '\n' <<
         "empty lines : " << s.emptyLineCount << '\n' <<
+        "all lines : " << s.totalLineCount << '\n' <<
         "non empty lines : " << s.nonemptyLineCount << '\n';
 
     return os;
