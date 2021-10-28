@@ -14,57 +14,43 @@ using ::testing::UnitTest;
 
 #define test
 #include <SA/stats.hpp>
-#include <SA/Lcounter.hpp>
+#include <SA/lineCounter.hpp>
 
 
 TEST(SAlines, basicEmptyLineCount) {
-	std::stringstream ss;
+	std::string ss = "not\n\n1";
 
-	ss << "not\n\n1";
-
-	Lcounter lineCounter;
+	lineCounter lineCounter;
 	lineCounter.countLines(ss);
 
 	EXPECT_EQ(lineCounter.getEmptyLineCount(),1);
 }
 
 TEST(SAlines, basicNonEmptyLineCount) {
-	std::stringstream ss;
+	std::string ss = "not\n\n1";
 
-	ss << "not\n\n1";
-
-	Lcounter lineCounter;
+	lineCounter lineCounter;
 	lineCounter.countLines(ss);
 
 	EXPECT_EQ(lineCounter.getnonemptyLineCount(), 2);
 }
 
 TEST(SAlines, EmptyLineCount) {
-	std::stringstream ss;
+	std::string ss = "not1\n\n\nnot2\n\nnot enter\nasd\n\n\n\n\n";
 
-	ss << "not1\n\n\nnot2\n\nnot enter\nasd\n\n\n\n\n";
-
-	Lcounter lineCounter;
+	lineCounter lineCounter;
 	lineCounter.countLines(ss);
 
 	EXPECT_EQ(lineCounter.getEmptyLineCount(), 7);
 }
 
 TEST(SAlines, nonemptyLineCount) {
-	std::stringstream ss;
+	std::string ss = "not1\n\n\nnot2\n\nnot enter\nasd\n\n\n\n\n";
 
-	ss << "not1\n\n\nnot2\n\nnot enter\nasd\n\n\n\n\n";
-
-	Lcounter lineCounter;
+	lineCounter lineCounter;
 	lineCounter.countLines(ss);
 
 	EXPECT_EQ(lineCounter.getnonemptyLineCount(), 4);
-}
-
-TEST(SA, mergeUpperCase) {
-
-	Statistics stat(true);
-	ASSERT_DEATH(stat.count(std::string("d")), "");
 }
 
 int main(int argc, char** argv) {
