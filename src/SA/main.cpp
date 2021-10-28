@@ -1,21 +1,17 @@
+#include <string>
+#include <sstream>
 #include <iostream>
 #include <filesystem>
-#include <string>
 
 #include <SA/stats.hpp>
-
+#include <SA/Lcounter.hpp>
 
 namespace fs = std::filesystem;
 
 int main(){
 
     Statistics stat;
-    stat.count(std::string("t"));
-    stat.count(std::string("test"));
-    stat.count(std::string("test"));
-    stat.count(std::string("test"));
-    stat.printStats();
-    std::cout<<stat;
+   // std::cout<<stat;
 
    std::vector<fs::path> foundFiles;
 
@@ -24,7 +20,7 @@ int main(){
     //prevent generating exception by non ascii characters
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
-    bool onlyTxtfiles = false;
+    bool onlyTxtfiles = true;
 
     try {
         if (dir.is_directory()) {
@@ -48,6 +44,7 @@ int main(){
         }
         else {
             std::cout <<"Provided file path is invalid. Exiting..." << '\n';
+            return -1;
         }
     }
     catch (const std::system_error& e) {
@@ -55,5 +52,13 @@ int main(){
             << " meaning " << e.what() << '\n';
     }
    
+    std::ifstream t(foundFiles[0]);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    t.close();
+
+    Lcounter lineCounter;
+    lineCounter.countLines(buffer);
+
     return 0;
 }
