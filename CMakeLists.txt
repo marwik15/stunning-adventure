@@ -14,6 +14,10 @@ if(MSVC)
     include (cmake/config/win-vs.cmake)
 endif()
 
+if (UNIX AND NOT APPLE)
+    include (cmake/config/gnu+linux-gcc-clang.cmake)
+endif ()
+
 target_compile_features(SA PUBLIC cxx_std_17)
 target_compile_features(SA_test PUBLIC cxx_std_17)
 

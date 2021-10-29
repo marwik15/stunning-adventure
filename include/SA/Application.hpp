@@ -104,7 +104,7 @@ SA_Private:
     std::mutex linesMutex;
     std::vector<std::future<void>> futures;
 
-    void job(std::string& s) {
+    void job(std::string s) {
         lineCounter l;
         l.countLines(s);
 

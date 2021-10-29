@@ -5,7 +5,14 @@
 
 class Timer {
 public:
+#ifdef WIN32
 	std::chrono::time_point<std::chrono::steady_clock> start, end;
+#endif // win32
+
+#ifdef __linux__ 
+	std::chrono::_V2::system_clock::time_point start, end;
+#endif // linux
+
 	std::chrono::duration<float> duration;
 
 	Timer() {
