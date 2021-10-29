@@ -20,7 +20,7 @@ struct Settings {
     bool useThreads = false;
 };
 
-class Application : public lineCounter, public wordCounter{
+class Application {
 SA_Private:
     std::vector<std::string> filesContent;
     std::vector<fs::path> foundFiles;
@@ -92,8 +92,14 @@ SA_Private:
 
     void singleCountLines() {
         for (auto& f : filesContent) {
-            countLines(f);
+            lineCounter l;
+            l.countLines(f);
+
+            stats.addemptyLineCount(l.getEmptyLineCount());
+            stats.addnonemptyLineCount(l.getnonemptyLineCount());
+            stats.addTotalLineCount(l.getTotalLineCount());
         }
+
         finishedJob = true;
     }
 
@@ -165,15 +171,7 @@ public:
             threadCountLines();
         } else {
             singleCountLines();
-            updateStats();
         }
-    }
-    
-    /// @brief update statists 
-    void updateStats() {
-        stats.setemptyLineCount(getEmptyLineCount());
-        stats.setnonemptyLineCount(getnonemptyLineCount());
-        stats.setTotalLineCount(getTotalLineCount());
     }
 };
 
@@ -184,6 +182,7 @@ int main(){
     Application app;
     app.start("bench");
     Timer timer;
+    //counter runs in async mode
     while(1){
         if (app.isFinished()) {
             std::cout << app.getStats();
