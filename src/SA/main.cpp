@@ -6,6 +6,7 @@
 #include <SA/Statistics.hpp>
 #include <SA/lineCounter.hpp>
 #include <SA/wordCounter.hpp>
+#include <SA/Timer.hpp>
 
 #include <future>
 
@@ -15,8 +16,8 @@ struct Settings {
     bool onlyTxtfiles = true;
     bool merge_uppercase = false;
     bool countWords = false;
-    bool printDebug = true;
-    bool useThreads = true;
+    bool printDebug = false;
+    bool useThreads = false;
 };
 
 class Application : public lineCounter, public wordCounter{
@@ -28,6 +29,8 @@ SA_Private:
 
     Statistics stats;
     Settings settings;
+
+    bool finishedJob = false;
 
     /// @brief save all found file's path in provided path
     /// @return 
@@ -91,6 +94,7 @@ SA_Private:
         for (auto& f : filesContent) {
             countLines(f);
         }
+        finishedJob = true;
     }
 
     std::mutex linesMutex;
@@ -112,8 +116,15 @@ SA_Private:
         for (auto& f : filesContent) {
             futures.push_back(std::async(std::launch::async, &Application::job,this,f));
         }
+
+        finishedJob = true;
+      
     }
 public:
+    bool isFinished() {
+        return finishedJob;
+    }
+
     Application(){
     }
     
@@ -136,8 +147,9 @@ public:
 
         scanForFiles();
         loadAllFileContents();
+        stats.setfileCount(foundFiles.size());
+
         lines();
-        updateStats();
     }
     
     /// @brief set sustom settings
@@ -153,12 +165,12 @@ public:
             threadCountLines();
         } else {
             singleCountLines();
+            updateStats();
         }
     }
     
     /// @brief update statists 
     void updateStats() {
-        stats.setfileCount(foundFiles.size());
         stats.setemptyLineCount(getEmptyLineCount());
         stats.setnonemptyLineCount(getnonemptyLineCount());
         stats.setTotalLineCount(getTotalLineCount());
@@ -171,7 +183,14 @@ int main(){
 
     Application app;
     app.start("bench");
-    std::cout << app.getStats();
+    Timer timer;
+    while(1){
+        if (app.isFinished()) {
+            std::cout << app.getStats();
+            break;
+        }
+    }
+
  
     return 0;
 }
