@@ -15,20 +15,24 @@ struct Settings {
     bool countWords = false;
 };
 
+
 class Application : public lineCounter, public wordCounter{
 SA_Private:
     std::vector<std::string> filesContent;
     std::vector<fs::path> foundFiles;
     fs::directory_entry dir;
+    fs::path searchPath;
+
     bool onlyTxtfiles;
 
     Statistics stats;
     Settings settings;
 
     int scanForFiles() {
-        dir.assign(u8"C:/users/marwik15/desktop/bench");
+        dir.assign(searchPath);
         try {
             if (dir.is_directory()) {
+              
                 //scan for files
                 for (auto& d : fs::recursive_directory_iterator(dir)) {
 
@@ -74,7 +78,17 @@ public:
     Application(){
     }
 
-    void start() {
+    /// @brief start application with default search_path (current binary dir) and perform chosen operations 
+    /// @param customize search path by changing path parameter
+    /// @return 
+    void start(fs::path path ="") {
+        if (path.empty()) {
+            searchPath = fs::current_path();
+        }
+        else {
+            searchPath = path;
+        }
+
         scanForFiles();
         loadAllFileContents();
         lines();
@@ -82,17 +96,22 @@ public:
 
         std::cout << stats;
     }
-
+    
+    /// @brief set sustom settings
+    /// @param refrence to Settings struct
+    /// @return 
     void setSettings(Settings& settings) {
         this->settings = settings;
     }
 
+    /// @brief cout lines in all loaded files
     void lines() {
         for (auto& f : filesContent) {
             countLines(f);
         }
     }
-
+    
+    /// @brief update statists 
     void updateStats() {
         stats.setfileCount(foundFiles.size());
         stats.setemptyLineCount(getEmptyLineCount());
@@ -103,11 +122,11 @@ public:
 };
 
 int main(){
-    Settings Settings;
     //prevent generating exception by non ascii characters
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
     Application app;
     app.start();
+ 
     return 0;
 }
