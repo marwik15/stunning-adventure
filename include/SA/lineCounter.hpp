@@ -19,8 +19,7 @@ public:
 
 		//find all \n
 		size_t pos = buffer.find("\n", 0);
-		while (pos != std::string::npos)
-		{
+		while (pos != std::string::npos){
 			positions.push_back(pos);
 			pos = buffer.find("\n", pos + 1);
 		}
