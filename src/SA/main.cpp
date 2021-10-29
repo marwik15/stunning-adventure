@@ -13,8 +13,8 @@ struct Settings {
     bool onlyTxtfiles = true;
     bool merge_uppercase = false;
     bool countWords = false;
+    bool printDebug = true;
 };
-
 
 class Application : public lineCounter, public wordCounter{
 SA_Private:
@@ -23,11 +23,11 @@ SA_Private:
     fs::directory_entry dir;
     fs::path searchPath;
 
-    bool onlyTxtfiles;
-
     Statistics stats;
     Settings settings;
 
+    /// @brief save all found file's path in provided path
+    /// @return 
     int scanForFiles() {
         dir.assign(searchPath);
         try {
@@ -37,17 +37,23 @@ SA_Private:
                 for (auto& d : fs::recursive_directory_iterator(dir)) {
 
                     //save path only to .txt files
-                    if (onlyTxtfiles) {
+                    if (settings.onlyTxtfiles) {
                         if (d.path().extension() == ".txt") {
+
                             foundFiles.push_back(d.path());
-                            //std::cout << d.path() << '\n';
+
+                            if (settings.printDebug) {
+                                std::cout <<"found file! : "<< d.path() << '\n';
+                            }
                         }
                     }
                     //save path to all files
                     else {
                         foundFiles.push_back(d.path());
-                        //std::cout << d.path() << '\n';
 
+                        if (settings.printDebug) {
+                            std::cout << "found file! : " << d.path() << '\n';
+                        }
                     }
                 }
             }
@@ -59,13 +65,16 @@ SA_Private:
         catch (const std::system_error& e) {
             std::cerr << "Caught system_error with code " << e.code()
                 << " meaning " << e.what() << '\n';
+            return EXIT_FAILURE;
         }
 
         return EXIT_SUCCESS;
     }
-
+    /// @brief load all found files 
     void loadAllFileContents() {
+
         filesContent.reserve(foundFiles.size());
+
         for (auto& r : foundFiles) {
             std::ifstream t(r);
             std::stringstream buffer;
@@ -76,6 +85,12 @@ SA_Private:
     }
 public:
     Application(){
+    }
+    
+    /// @brief get refrence to Statistics object
+    /// @return 
+    Statistics& getStats() {
+        return stats;
     }
 
     /// @brief start application with default search_path (current binary dir) and perform chosen operations 
@@ -93,8 +108,6 @@ public:
         loadAllFileContents();
         lines();
         updateStats();
-
-        std::cout << stats;
     }
     
     /// @brief set sustom settings
@@ -118,7 +131,6 @@ public:
         stats.setnonemptyLineCount(getnonemptyLineCount());
         stats.setTotalLineCount(getTotalLineCount());
     }
-
 };
 
 int main(){
@@ -127,6 +139,7 @@ int main(){
 
     Application app;
     app.start();
+    std::cout << app.getStats();
  
     return 0;
 }

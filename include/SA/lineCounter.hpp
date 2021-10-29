@@ -11,6 +11,8 @@ public:
 	lineCounter() {
 		emptyLineCount = nonemptyLineCount = totalLineCount = 0;
 	}
+	/// @brief count lines in provided buffer
+	/// @param buffer 
 	void countLines(std::string& buffer) {
 
 		std::vector<size_t> positions;

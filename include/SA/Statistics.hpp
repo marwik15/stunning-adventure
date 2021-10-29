@@ -65,7 +65,7 @@ SA_Private:
     }
 
     void printFileInfo() {
-        std::cout << "files : " << fileCount << '\n' <<
+        std::cout << "\nfiles : " << fileCount << '\n' <<
             "empty lines : " << emptyLineCount << '\n' <<
             "non empty lines : " << nonemptyLineCount << '\n';
     }
