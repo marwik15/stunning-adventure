@@ -17,6 +17,10 @@ private:
   
 public:
 
+    Statistics() {
+        fileCount = emptyLineCount = nonemptyLineCount = totalLineCount = 0;
+    }
+
     void printStats() {
         printWordInfo();
         printFileInfo();
@@ -26,13 +30,26 @@ public:
         this->fileCount = fileCount;
     }
     void setemptyLineCount(int emptyLineCount) {
-        this->emptyLineCount= emptyLineCount;
+        this->emptyLineCount = emptyLineCount;
     }
-    void setnonemptyLineCount(int emptyLineCount) {
-        this->nonemptyLineCount = emptyLineCount;
+    void setnonemptyLineCount(int nonemptyLineCount) {
+        this->nonemptyLineCount = nonemptyLineCount;
     }
     void setTotalLineCount(int totalLineCount) {
         this->totalLineCount = totalLineCount;
+    }
+
+    void addfileCount(int fileCount) {
+        this->fileCount = fileCount;
+    }
+    void addemptyLineCount(int emptyLineCount) {
+        this->emptyLineCount += emptyLineCount;
+    }
+    void addnonemptyLineCount(int nonemptyLineCount) {
+        this->nonemptyLineCount += nonemptyLineCount;
+    }
+    void addTotalLineCount(int totalLineCount) {
+        this->totalLineCount += totalLineCount;
     }
 
 
@@ -80,9 +97,9 @@ std::ostream& operator<<(std::ostream& os, const Statistics& s) {
     //}
 
     os << "files : " << s.fileCount << '\n' <<
-        "empty lines : " << s.emptyLineCount << '\n' <<
         "all lines : " << s.totalLineCount << '\n' <<
-        "non empty lines : " << s.nonemptyLineCount << '\n';
+        "non empty lines : " << s.nonemptyLineCount << '\n' <<
+        "empty lines : " << s.emptyLineCount << '\n' ;
 
     return os;
 }

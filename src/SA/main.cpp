@@ -7,6 +7,8 @@
 #include <SA/lineCounter.hpp>
 #include <SA/wordCounter.hpp>
 
+#include <future>
+
 namespace fs = std::filesystem;
 
 struct Settings {
@@ -14,6 +16,7 @@ struct Settings {
     bool merge_uppercase = false;
     bool countWords = false;
     bool printDebug = true;
+    bool useThreads = true;
 };
 
 class Application : public lineCounter, public wordCounter{
@@ -83,6 +86,33 @@ SA_Private:
             t.close();
         }
     }
+
+    void singleCountLines() {
+        for (auto& f : filesContent) {
+            countLines(f);
+        }
+    }
+
+    std::mutex linesMutex;
+    std::vector<std::future<void>> futures;
+
+    void job(std::string& s) {
+        lineCounter l;
+        l.countLines(s);
+
+        std::lock_guard<std::mutex> lock(linesMutex);
+        
+        stats.addemptyLineCount(l.getEmptyLineCount());
+        stats.addnonemptyLineCount(l.getnonemptyLineCount());
+        stats.addTotalLineCount(l.getTotalLineCount());
+    }
+
+    void threadCountLines() {
+
+        for (auto& f : filesContent) {
+            futures.push_back(std::async(std::launch::async, &Application::job,this,f));
+        }
+    }
 public:
     Application(){
     }
@@ -117,10 +147,12 @@ public:
         this->settings = settings;
     }
 
-    /// @brief cout lines in all loaded files
+    /// @brief count lines in all loaded files
     void lines() {
-        for (auto& f : filesContent) {
-            countLines(f);
+        if (settings.useThreads) {
+            threadCountLines();
+        } else {
+            singleCountLines();
         }
     }
     
@@ -138,7 +170,7 @@ int main(){
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
     Application app;
-    app.start();
+    app.start("bench");
     std::cout << app.getStats();
  
     return 0;
