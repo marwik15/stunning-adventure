@@ -23,15 +23,21 @@ public:
 			pos = buffer.find("\n", pos + 1);
 		}
 
+		// file contains single line without \n
+		if (positions.size() == 0) {
+			nonemptyLineCount++;
+			totalLineCount += nonemptyLineCount;
+			return;
+		}
+
 		//count empty lines by checking if next found position is sequential number
 		for (int i = 0; i < positions.size()-1; i++) {
 			if (++positions[i] == positions[i+1]) {
 				emptyLineCount++;
-				
 			}
 		}
 
-		nonemptyLineCount = positions.size() - emptyLineCount;
+		nonemptyLineCount += positions.size() - emptyLineCount;
 
 		// count last line if doesn't end with \n
 		auto lastPosition = positions.at(positions.size() - 1);
@@ -40,7 +46,7 @@ public:
 			nonemptyLineCount++;
 		}
 
-		totalLineCount = nonemptyLineCount + emptyLineCount;
+		totalLineCount += nonemptyLineCount + emptyLineCount;
 	}
 
 	int getnonemptyLineCount() {
