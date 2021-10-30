@@ -32,10 +32,10 @@ void generateTestData(int fileCount,int emptylineCount,int nonemptyLineCount, st
     }
 }
 
-void startNormal() {
+void startNormal(std::string path) {
     Application app;
 
-    app.start("bench");
+    app.start(path);
     std::cout << app.getStats();
 }
 
@@ -70,6 +70,26 @@ void startBenchmark(int loops){
 
 int main(){
     bool useBenchmark = false;
+    std::string userPath;
+    std::string userModeChoise;
+
+    start:
+    std::cout << "benchamrk mode ? (y/n) ";
+    std::cin >> userModeChoise;
+
+    //dirty menu ^^
+    if (userModeChoise != "y" && userModeChoise != "n") {
+        goto start;
+    }
+
+    if (userModeChoise == "y") {
+        useBenchmark = true;
+    }
+
+    if (userModeChoise == "n") {
+        std::cout << "path to scan ";
+        std::cin >> userPath;
+    } 
 
     //prevent generating exception by non ascii characters
     std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -77,7 +97,7 @@ int main(){
     if (useBenchmark) {
         startBenchmark(4);
     } else {
-        startNormal();
+        startNormal(userPath);
     }
     
     return 0;
