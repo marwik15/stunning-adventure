@@ -4,14 +4,45 @@
 #include <SA/Application.hpp>
 
 
+void generateTestData(int fileCount,int emptylineCount,int nonemptyLineCount, std::string Path = "") {
+   
+    if (!fs::exists(Path))
+        fs::create_directories(Path);
+
+    std::string path;
+    for (int i = 0; i < fileCount; i++) {
+        path = Path + "/testfile" + std::to_string(i) + ".txt";
+
+        std::ofstream ofs(path);
+        
+        if (ofs.is_open()) {
+
+            for (int e = 0; e < nonemptyLineCount; e++) {
+                ofs << "non empty\n";
+            }
+
+            for (int n = 0; n < emptylineCount; n++) {
+                ofs << "\n";
+            }
+         
+            ofs.close();
+        } else {
+            std::cout << "Error opening file\n";
+        }
+    }
+}
+
 void startNormal() {
     Application app;
 
-    app.start("benchF");
+    app.start("bench");
     std::cout << app.getStats();
 }
 
 void benchmarch(bool useThreads) {
+    std::string benchmarkCachePath = "benchmarkFiles/";
+    generateTestData(100, 1032, 1045, benchmarkCachePath);
+
     Settings s;
     s.useThreads = useThreads;
 
@@ -20,9 +51,11 @@ void benchmarch(bool useThreads) {
 
     Timer timer;
 
-    app.start("benchF");
+    app.start(benchmarkCachePath);
     std::cout << app.getStats();
     app.deleteLoadedData();
+
+    int n = std::filesystem::remove_all(benchmarkCachePath);
 }
 
 void startBenchmark(int loops){
