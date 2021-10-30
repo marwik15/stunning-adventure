@@ -7,17 +7,9 @@
 void startNormal() {
     Application app;
 
-    app.start("bench");
-    Timer timer;
-    //counter runs in async mode
-    while (1) {
-        if (app.isFinished()) {
-            std::cout << app.getStats();
-            break;
-        }
-    }
+    app.start("benchF");
+    std::cout << app.getStats();
 }
-
 
 void benchmarch(bool useThreads) {
     Settings s;
@@ -26,15 +18,10 @@ void benchmarch(bool useThreads) {
     Application app;
     app.setSettings(s);
 
-    app.start("bench");
     Timer timer;
-    //counter runs in async mode
-    while (1) {
-        if (app.isFinished()) {
-            std::cout << app.getStats();
-            break;
-        }
-    }
+
+    app.start("benchF");
+    std::cout << app.getStats();
     app.deleteLoadedData();
 }
 
@@ -45,7 +32,6 @@ void startBenchmark(int loops){
         benchmarch(false);
         std::cout << "---\nbenchmarking with async : \n";
         benchmarch(true);
-        
     }
 }
 
@@ -56,7 +42,7 @@ int main(){
     std::setlocale(LC_ALL, "en_US.UTF-8");
 
     if (useBenchmark) {
-        startBenchmark(2);
+        startBenchmark(4);
     } else {
         startNormal();
     }

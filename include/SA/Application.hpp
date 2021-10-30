@@ -14,7 +14,7 @@ namespace fs = std::filesystem;
 
 struct Settings {
     bool onlyTxtfiles = true;
-    bool merge_uppercase = false;
+    bool merge_uppercase = false; // to do
     bool countWords = false;
     bool printDebug = false;
     bool useThreads = true;
@@ -29,8 +29,6 @@ SA_Private:
 
     Statistics stats;
     Settings settings;
-
-    bool finishedJob = false;
 
     /// @brief save all found file's path in provided path
     /// @return 
@@ -74,37 +72,60 @@ SA_Private:
 
         return EXIT_SUCCESS;
     }
-    /// @brief load all found files 
-    void loadAllFileContents() {
 
-        filesContent.reserve(foundFiles.size());
-
-        for (auto& r : foundFiles) {
-            std::ifstream t(r);
-            std::stringstream buffer;
-            buffer << t.rdbuf();
-            filesContent.push_back(buffer.str());
-            t.close();
+    /// @brief wait for async job to complete
+    /// @param future futures vector to watch for
+    void waitForAsync(std::vector<std::future<void>>& future) {
+        for (auto& f : future) {
+            f.wait();
         }
     }
 
-    void singleCountLines() {
-        for (auto& f : filesContent) {
-            lineCounter l;
-            l.countLines(f);
+    std::mutex contentMutex;
+    std::vector<std::future<void>> futuresContent;
 
-            stats.addemptyLineCount(l.getEmptyLineCount());
-            stats.addnonemptyLineCount(l.getnonemptyLineCount());
-            stats.addTotalLineCount(l.getTotalLineCount());
+    /// @brief (job) load file's content
+    /// @param r path to file
+    void getContentJob(fs::path r) {
+        std::ifstream t(r);
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        t.close();
+        std::lock_guard<std::mutex> lock(contentMutex);
+        filesContent.push_back(buffer.str());
+    }
+
+    /// @brief load file's content in single thread
+    void getContentSingle() {
+        for (auto& r : foundFiles) {
+            getContentJob(r);
         }
+    }
 
-        finishedJob = true;
+    /// @brief load file's content in async
+    void getContentAsync() {
+        for (auto& f : foundFiles) {
+            futuresContent.push_back(std::async(std::launch::async, &Application::getContentJob, this, f));
+        }
+    }
+
+    /// @brief load all found files 
+    void loadAllFileContents() {
+        filesContent.reserve(foundFiles.size());
+
+        if (settings.useThreads) {
+            getContentAsync();
+        } else {
+            getContentSingle();
+        }
     }
 
     std::mutex linesMutex;
-    std::vector<std::future<void>> futures;
+    std::vector<std::future<void>> futuresLineCount;
 
-    void job(std::string s) {
+    /// @brief count lines job
+    /// @param s buffer with lines to count
+    void countLinesJob(std::string s) {
         lineCounter l;
         l.countLines(s);
 
@@ -115,23 +136,27 @@ SA_Private:
         stats.addTotalLineCount(l.getTotalLineCount());
     }
 
-    void threadCountLines() {
-
+    /// @brief count lines in single thread
+    void countLinesSingle() {
         for (auto& f : filesContent) {
-            futures.push_back(std::async(std::launch::async, &Application::job, this, f));
+            countLinesJob(f);
         }
-
-        finishedJob = true;
-
     }
+
+    /// @brief count lines in async
+    void countLinesAsync() {
+        for (auto& f : filesContent) {
+            futuresLineCount.push_back(std::async(std::launch::async, &Application::countLinesJob, this, f));
+        }
+    }
+ 
 public:
-    bool isFinished() {
-        return finishedJob;
-    }
 
     void deleteLoadedData() {
         filesContent.clear();
         foundFiles.clear();
+        futuresLineCount.clear();
+        futuresContent.clear();
     }
 
     Application() {
@@ -154,10 +179,14 @@ public:
         }
 
         scanForFiles();
+
         loadAllFileContents();
+        waitForAsync(futuresContent);
+
         stats.setfileCount(foundFiles.size());
 
         lines();
+        waitForAsync(futuresLineCount);
     }
 
     /// @brief set sustom settings
@@ -170,9 +199,9 @@ public:
     /// @brief count lines in all loaded files
     void lines() {
         if (settings.useThreads) {
-            threadCountLines();
+           countLinesAsync();
         } else {
-            singleCountLines();
+            countLinesSingle();
         }
     }
 };
